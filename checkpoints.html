@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkpoints — PARMCO</title>
+  <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<nav id="site-nav">
+  <a href="index.html" class="nav-logo"><span class="nav-logo-dot"></span>PARMCO</a>
+  <button class="nav-toggle" aria-label="Toggle menu">MENU</button>
+  <ul class="nav-links">
+    <li><a href="index.html">Overview</a></li>
+    <li><a href="how-it-works.html">How It Works</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="checkpoints.html" class="active">Checkpoints</a></li>
+    <li><a href="team.html">Team</a></li>
+  </ul>
+</nav>
+
+<main>
+  <section class="page-hero">
+    <div class="wrap">
+      <span class="label">§ CHECKPOINTS</span>
+      <h1>Four checkpoints. <em>One</em> semester.</h1>
+      <p>Paper schematic in January. Phone controls a spinning motor in April.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="cp-timeline">
+
+        <!-- CP1 -->
+        <article class="cp reveal">
+          <div class="cp-index">
+            <span class="cp-num">CP 01</span>
+            <span class="cp-date">FEB 2026</span>
+          </div>
+          <div class="cp-body">
+            <h2 class="cp-title">Design &amp; <em>planning.</em></h2>
+            <p>The opening checkpoint established project scope and produced initial hardware documentation. The team defined the system architecture: phone app communicating over BLE to a Pi-based motor controller. Research covered the L293D H-bridge, the BCM2711 GPIO peripheral model, BlueZ GATT server programming, and the Nichibo PC-260SB motor characteristics.</p>
+            <p>An AI-generated schematic and technical documentation were produced alongside a human-written strategy document describing the implementation plan, risk areas, and division of labour.</p>
+            <div class="cp-tags">
+              <span class="tag">System architecture</span>
+              <span class="tag">Component research</span>
+              <span class="tag">Risk assessment</span>
+            </div>
+            <div class="cp-files">
+              <a class="cp-file" href="Project_CP1/Final%20Project%20Checkpoint%201.pdf">CP1 Report · PDF</a>
+              <a class="cp-file" href="Project_CP1/README.md">README</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- CP2 -->
+        <article class="cp reveal">
+          <div class="cp-index">
+            <span class="cp-num">CP 02</span>
+            <span class="cp-date">MAR 2026</span>
+          </div>
+          <div class="cp-body">
+            <h2 class="cp-title">BLE, iOS &amp; keyboard <em>motor control.</em></h2>
+            <p>Three working subsystems, built independently before integration.</p>
+
+            <h3>BLE GATT server</h3>
+            <p><code>ble_server.c</code> — a C program using GLib / GDBus to register a custom GATT service with BlueZ, advertise as <strong>PARMCO-RP4</strong>, accept motor commands, and return mock RPM telemetry (speed% × 100). No motor output connected yet.</p>
+
+            <h3>iOS application</h3>
+            <p>Native SwiftUI + CoreBluetooth, with a parallel React Native + Expo build. Both scan for the PARMCO service UUID, connect, send ASCII command strings, and display incoming RPM notifications. SwiftUI is used for all demos.</p>
+
+            <h3>Motor keyboard control</h3>
+            <p><code>motor_control.c</code> paired with an ARMv7 assembly GPIO module. Non-blocking terminal input via <code>termios</code> + <code>select()</code>. pigpio DMA-based 20 kHz PWM on GPIO18. Three control modes already present: Manual, Maintain, and Match. BLE and motor subsystems ran independently.</p>
+
+            <div class="cp-tags">
+              <span class="tag">GATT server</span>
+              <span class="tag">SwiftUI</span>
+              <span class="tag">pigpio PWM</span>
+              <span class="tag">ARM asm</span>
+            </div>
+            <div class="cp-files">
+              <a class="cp-file" href="Project_CP2/docs/Final%20Project%20Checkpoint%202.pdf">CP2 Report · PDF</a>
+              <a class="cp-file" href="Project_CP2/docs/PARMCO_Motor_Schematic_Documentation.pdf">Schematic Doc</a>
+              <a class="cp-file" href="Project_CP2/docs/PARMCO_CP2_Implementation_Plan.md">Implementation Plan</a>
+              <a class="cp-file code" href="Project_CP2/ble/ble_server.c">ble_server.c</a>
+              <a class="cp-file code" href="Project_CP2/motor/motor_control.c">motor_control.c</a>
+              <a class="cp-file code" href="Project_CP2/motor/gpio_asm.s">gpio_asm.s</a>
+              <a class="cp-file" href="Project_CP2/docs/Claude_Planning_Coding_CP2_Transcript.md">Claude Transcript</a>
+              <a class="cp-file" href="Project_CP2/docs/Gemini_DeepResearch_CP2_Transcript.md">Gemini Transcript</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- CP3 -->
+        <article class="cp reveal">
+          <div class="cp-index">
+            <span class="cp-num">CP 03</span>
+            <span class="cp-date">APR 2026</span>
+          </div>
+          <div class="cp-body">
+            <h2 class="cp-title">Integration, IR feedback, <em>autostart.</em></h2>
+            <p>The third checkpoint connected all CP2 subsystems into a single end-to-end system and added the hardware features required for closed-loop control.</p>
+
+            <h3>BLE integration</h3>
+            <p><code>ble_server.c</code> now calls motor-control functions directly on every received command. A phone tap on Start sends <code>START</code> over BLE; <code>parse_command()</code> sets <code>motor_state.running = 1</code>; <code>gpioPWM()</code> drives the enable pin immediately.</p>
+
+            <h3>Real RPM telemetry</h3>
+            <p>An IR sensor on the propeller is wired to GPIO17. pigpio's alert callback counts rising edges with an 800 µs debounce. The telemetry characteristic now emits <code>RPM:&lt;int&gt;</code> at 5 Hz while running, 1 Hz at idle.</p>
+
+            <h3>Pairing agent</h3>
+            <p>A <code>NoInputNoOutput</code> BlueZ <code>Agent1</code> at <code>/com/parmco/agent</code> auto-accepts all iOS pairing requests. Without this agent, the connection hangs indefinitely on "waiting for response from Bluetooth device."</p>
+
+            <h3>systemd autostart</h3>
+            <p><code>parmco-ble.service</code> starts <code>ble_server</code> after <code>bluetooth.service</code> on every boot, with <code>Restart=on-failure</code>. The CP3 check sheet tests autonomous reconnect after power cycle and "Forget This Device" — both pass without any console input on the Pi.</p>
+
+            <div class="cp-tags">
+              <span class="tag">End-to-end BLE</span>
+              <span class="tag">IR sensor</span>
+              <span class="tag">Just Works pairing</span>
+              <span class="tag">systemd</span>
+            </div>
+            <div class="cp-files">
+              <a class="cp-file" href="Project_CP3/docs/ECSE%204235%20Project%20CP%203.pdf">CP3 Report · PDF</a>
+              <a class="cp-file" href="Project_CP3/docs/firmware_spec.md">Firmware Spec</a>
+              <a class="cp-file" href="Project_CP3/docs/PARMCO_CP3_Implementation_Plan.md">Implementation Plan</a>
+              <a class="cp-file code" href="Project_CP3/ble/ble_server.c">ble_server.c</a>
+              <a class="cp-file code" href="Project_CP3/motor/motor_control_cp3.c">motor_control_cp3.c</a>
+              <a class="cp-file code" href="Project_CP3/motor/gpio_asm.s">gpio_asm.s</a>
+              <a class="cp-file code" href="Project_CP3/ble/parmco-ble.service">systemd unit</a>
+            </div>
+          </div>
+        </article>
+
+        <!-- FINAL -->
+        <article class="cp cp-final reveal">
+          <div class="cp-index">
+            <span class="cp-num">FINAL</span>
+            <span class="cp-date">APR 2026</span>
+          </div>
+          <div class="cp-body">
+            <h2 class="cp-title">All three control modes, <em>on one tap.</em></h2>
+            <p>All three modes in one build. We walk through ten things on stage — cold boot, scan, connect, forward, reverse, start, stop, speed ramp, target RPM, and a forget-device + power-cycle reconnect — and nobody touches the Pi's keyboard.</p>
+
+            <div class="mode-stack">
+              <div class="mode-row">
+                <span class="mode-tag">Manual</span>
+                <p>Direct PWM duty from the phone via <code>SPD:XX</code>. No feedback loop; percentage maps linearly to duty cycle.</p>
+              </div>
+              <div class="mode-row">
+                <span class="mode-tag">Maintain</span>
+                <p>Proportional controller (Kp = 0.04) holds a target RPM sent via <code>RPM:&lt;value&gt;</code>, using IR feedback. ±30 RPM deadband prevents hunting at steady state.</p>
+              </div>
+              <div class="mode-row">
+                <span class="mode-tag">Match</span>
+                <p>Motor tracks an external reference signal on GPIO23 using the same proportional controller against live IR feedback.</p>
+              </div>
+            </div>
+
+            <div class="cp-tags">
+              <span class="tag">Demo script</span>
+              <span class="tag">Three modes</span>
+              <span class="tag">Proportional control</span>
+            </div>
+            <div class="cp-files">
+              <a class="cp-file code" href="final_project/motor_control.c">motor_control.c · final</a>
+              <a class="cp-file code" href="final_project/gpio_asm.s">gpio_asm.s · final</a>
+              <a class="cp-file code" href="final_project/ble_server.c">ble_server.c · final</a>
+              <a class="cp-file code" href="final_project/motor_control_cp3.c">motor_control_cp3.c</a>
+              <a class="cp-file code" href="final_project/BLEManager.swift">BLEManager.swift</a>
+              <a class="cp-file code" href="final_project/ContentView.swift">ContentView.swift</a>
+              <a class="cp-file code" href="final_project/MotorState.swift">MotorState.swift</a>
+              <a class="cp-file code" href="final_project/Theme.swift">Theme.swift</a>
+              <a class="cp-file code" href="final_project/parmco-ble.service">parmco-ble.service</a>
+              <a class="cp-file code" href="final_project/Makefile">Makefile</a>
+              <a class="cp-file" href="final_project/README.md">README</a>
+              <a class="cp-file" href="final_project/CHANGES.md">CHANGES</a>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SOURCE CODE ==================== -->
+  <section class="section code-section">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ SOURCE CODE</div>
+        <h2 class="section-title">The <em>final</em> implementation.</h2>
+        <p class="section-lede">Two excerpts carry the weight of the whole project: the proportional controller that closes the loop, and the ARM assembly that writes the GPIO registers directly.</p>
+      </div>
+
+      <div class="code-block reveal">
+        <div class="code-head">
+          <span class="code-path">final_project/motor_control_cp3.c</span>
+          <span class="code-lang">C · P-controller</span>
+        </div>
+<pre class="code-body"><code><span class="c-com">/* Proportional controller — runs every 250 ms under the maintain mode */</span>
+<span class="c-kw">static</span> <span class="c-kw">void</span> <span class="c-fn">run_controller</span>(<span class="c-kw">void</span>)
+{
+    <span class="c-kw">int</span> error = target_rpm - current_rpm;
+    <span class="c-kw">if</span> (<span class="c-fn">abs</span>(error) &lt; DEADBAND_RPM) <span class="c-kw">return</span>;   <span class="c-com">// ±30 RPM — don't hunt</span>
+
+    <span class="c-kw">float</span> correction = KP * error;                 <span class="c-com">// Kp = 0.04</span>
+    <span class="c-kw">int</span>   new_duty   = current_duty + (<span class="c-kw">int</span>)correction;
+
+    <span class="c-kw">if</span> (new_duty &lt; <span class="c-num">0</span>)   new_duty = <span class="c-num">0</span>;
+    <span class="c-kw">if</span> (new_duty &gt; <span class="c-num">255</span>) new_duty = <span class="c-num">255</span>;
+
+    <span class="c-fn">gpioPWM</span>(PIN_ENABLE, new_duty);
+    current_duty = new_duty;
+}</code></pre>
+      </div>
+
+      <div class="code-block reveal">
+        <div class="code-head">
+          <span class="code-path">final_project/gpio_asm.s</span>
+          <span class="code-lang">ARMv7 · L190</span>
+        </div>
+<pre class="code-body"><code><span class="c-com">// gpio_write(pin, value) — atomic GPIO write via BCM2711 registers</span>
+<span class="c-kw">.global</span> gpio_write
+<span class="c-kw">.type</span>    gpio_write, %function
+
+<span class="c-fn">gpio_write</span>:
+    <span class="c-kw">ldr</span>     r2, =gpio_base_addr   <span class="c-com">// R2 ← &amp;base</span>
+    <span class="c-kw">ldr</span>     r2, [r2]              <span class="c-com">// R2 ← base</span>
+    <span class="c-kw">mov</span>     r3, <span class="c-num">#1</span>
+    <span class="c-kw">lsl</span>     r3, r3, r0            <span class="c-com">// R3 ← 1 &lt;&lt; pin</span>
+    <span class="c-kw">cmp</span>     r1, <span class="c-num">#0</span>
+    <span class="c-kw">beq</span>     .Lclear_pin
+    <span class="c-kw">str</span>     r3, [r2, <span class="c-num">#0x1C</span>]       <span class="c-com">// GPSET0 → pin HIGH</span>
+    <span class="c-kw">bx</span>      lr
+.Lclear_pin:
+    <span class="c-kw">str</span>     r3, [r2, <span class="c-num">#0x28</span>]       <span class="c-com">// GPCLR0 → pin LOW</span>
+    <span class="c-kw">bx</span>      lr</code></pre>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ BY THE NUMBERS</div>
+        <h2 class="section-title">Semester in <em>figures.</em></h2>
+      </div>
+      <div class="stat-grid reveal">
+        <div class="stat-tile">
+          <span class="stat-n">4</span>
+          <span class="stat-k">Checkpoints shipped</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-n">3</span>
+          <span class="stat-k">Control modes</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-n">5<span class="stat-hz">Hz</span></span>
+          <span class="stat-k">Telemetry cadence</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-n">20<span class="stat-hz">kHz</span></span>
+          <span class="stat-k">DMA PWM frequency</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-n">±30</span>
+          <span class="stat-k">RPM deadband</span>
+        </div>
+        <div class="stat-tile">
+          <span class="stat-n">0.04</span>
+          <span class="stat-k">Proportional gain</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-marquee" style="text-align: center">CHECK<em>POINTS</em></div>
+  <div class="footer-inner">
+    <div>PARMCO · ECSE 4235 · UGA</div>
+    <div>GROUP 07 · SPRING 2026</div>
+    <div>BUILT WITH CLAUDE · MMXXVI</div>
+  </div>
+</footer>
+
+<script src="tweaks.js"></script>
+<script src="bg-effects.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  BgEffects.dotGrid(document.querySelector('.page-hero'));
+});
+</script>
+</body>
+</html>

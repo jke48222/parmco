@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PARMCO — Bluetooth Motor Control</title>
+  <link rel="stylesheet" href="style.css">
+  <script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<!-- ========== NAV ========== -->
+<nav id="site-nav">
+  <a href="index.html" class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    PARMCO
+  </a>
+  <button class="nav-toggle" aria-label="Toggle menu">MENU</button>
+  <ul class="nav-links">
+    <li><a href="index.html" class="active">Overview</a></li>
+    <li><a href="how-it-works.html">How It Works</a></li>
+    <li><a href="architecture.html">Architecture</a></li>
+    <li><a href="checkpoints.html">Checkpoints</a></li>
+    <li><a href="team.html">Team</a></li>
+  </ul>
+</nav>
+
+<!-- ========== HERO ========== -->
+<header class="hero" id="hero">
+  <div class="hero-grid"></div>
+  <div class="blob"></div>
+
+  <div class="hero-meta-top">
+    <span><span class="dot"></span> LIVE · GROUP 07 · UGA</span>
+    <span>SPRING · 2026 / ECSE 4235</span>
+  </div>
+
+  <div class="hero-phone" aria-hidden="true">
+    <img src="images/parmco-app.png" alt="">
+  </div>
+
+  <div class="wrap">
+    <h1>
+      <span class="split-word">PARM</span><em class="split-word">CO</em>
+    </h1>
+    <div class="hero-split">
+      <p class="hero-tagline reveal reveal-delay-2">
+        Phone App Raspberry Pi Motor Control.<br>
+        <span>A Bluetooth DC motor system,</span> from SwiftUI tap to ARM assembly register write.
+      </p>
+      <div class="hero-specs reveal reveal-delay-3">
+        <div><span class="num">01</span> · BLE GATT · 2.4 GHZ</div>
+        <div><span class="num">02</span> · RPi 4 · BCM2711</div>
+        <div><span class="num">03</span> · L293D · H-BRIDGE</div>
+        <div><span class="num">04</span> · PC-260SB · 12V</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-cue">SCROLL</div>
+</header>
+
+<!-- ========== MARQUEE ========== -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>BlueZ</span><span>CoreBluetooth</span><span>SwiftUI</span><span>pigpio DMA</span><span>ARMv7 asm</span><span>GATT</span><span>GPIO</span><span>PWM 20 kHz</span>
+    <span>BlueZ</span><span>CoreBluetooth</span><span>SwiftUI</span><span>pigpio DMA</span><span>ARMv7 asm</span><span>GATT</span><span>GPIO</span><span>PWM 20 kHz</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ========== SECTION 01 · INTRO ========== -->
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ 01 / Thesis</div>
+        <h2 class="section-title">A phone, a Pi, a <em>motor</em>. That's it.</h2>
+      </div>
+
+      <div class="body-grid reveal reveal-delay-1">
+        <div class="aside">Concept</div>
+        <div class="body wide">
+          <p><strong>PARMCO</strong> is an iPhone app that spins a 12-volt DC motor over Bluetooth. Tap a button on the phone, a Raspberry Pi 4 picks up the command over a custom BLE GATT service, and an <strong>L293D</strong> H-bridge pushes current into a Nichibo <strong>PC-260SB</strong> motor. No cloud, no middleman, no vendor SDK.</p>
+          <p>We wrote every layer ourselves: the SwiftUI front-end, the CoreBluetooth central, the BlueZ GATT server in C, the proportional controller, and the ARMv7 assembly that pokes the BCM2711 GPIO registers directly. The PWM is cut on-chip by pigpio's DMA engine at 20 kHz.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 02 · SPEC STRIP ========== -->
+  <section class="section" id="spec" style="padding-top:0">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ 02 / At a glance</div>
+        <h2 class="section-title">System <em>vitals.</em></h2>
+      </div>
+    </div>
+
+    <div class="spec-strip reveal">
+      <div>
+        <div class="spec-label">01 · Controller</div>
+        <div class="spec-value">RPi <em>4</em></div>
+        <div class="spec-desc">BCM2711, quad-core Cortex-A72, Raspberry Pi OS 64-bit Bookworm.</div>
+      </div>
+      <div>
+        <div class="spec-label">02 · Radio</div>
+        <div class="spec-value"><em>BLE</em> 5.0</div>
+        <div class="spec-desc">BlueZ 5.66 custom GATT service. Write + notify, Just Works pairing.</div>
+      </div>
+      <div>
+        <div class="spec-label">03 · Drive</div>
+        <div class="spec-value">20 <em>kHz</em></div>
+        <div class="spec-desc">Hardware DMA PWM on GPIO18 via pigpio. Duty 0–100%.</div>
+      </div>
+      <div>
+        <div class="spec-label">04 · Feedback</div>
+        <div class="spec-value">5 <em>Hz</em></div>
+        <div class="spec-desc">IR-sensor RPM telemetry, rising-edge count, 800 µs debounce.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 03 · CALLOUT + DETAIL ========== -->
+  <section class="section" id="modes">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ 03 / Control</div>
+        <h2 class="section-title">Three modes. One <em>loop.</em></h2>
+      </div>
+
+      <div class="body-grid reveal">
+        <div class="aside">A · Manual</div>
+        <div class="body">
+          <p>Open loop. The iOS slider writes <code>SPD:75</code> to the command characteristic, the Pi maps 0–100% onto an 8-bit duty, and that's what the enable pin gets. The motor spins at whatever RPM that duty happens to produce.</p>
+        </div>
+      </div>
+
+      <div class="body-grid reveal">
+        <div class="aside">B · Maintain</div>
+        <div class="body">
+          <p>A proportional controller (<code>Kp = 0.04</code>, ±30 RPM deadband, 250 ms tick) holds a target RPM using the IR-sensor count. Hits 4,500 RPM in about a second without overshooting. The deadband keeps it from hunting once it's there.</p>
+        </div>
+      </div>
+
+      <div class="body-grid reveal">
+        <div class="aside">C · Match</div>
+        <div class="body">
+          <p>Feed a reference pulse into GPIO23 — a function generator, a second IR sensor, another motor — and ours tracks it. Same controller, just a different error input.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 04 · BIG STAT ========== -->
+  <section class="section" id="vitals" style="background:var(--bg-2); padding-top:clamp(6rem,14vh,10rem); padding-bottom:clamp(6rem,14vh,10rem);">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ 04 / In numbers</div>
+        <h2 class="section-title">Numbers we <em>actually</em> measured.</h2>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:3rem 2rem; margin-top:3rem;">
+        <div class="reveal">
+          <div class="big-stat"><em>6,000</em> <span class="unit">RPM max</span></div>
+          <p style="margin-top:1rem; font-size:.95rem; max-width:32ch">What the Nichibo PC-260SB tops out at unloaded on 12 V. With the IR flag glued to the shaft we see about 5,400.</p>
+        </div>
+        <div class="reveal reveal-delay-1">
+          <div class="big-stat">~<em>1</em><span style="font-size:.4em;margin-left:.1em">s</span> <span class="unit">settle</span></div>
+          <p style="margin-top:1rem; font-size:.95rem; max-width:32ch">Zero to 4,500 RPM in maintain mode. No overshoot on the scope.</p>
+        </div>
+        <div class="reveal reveal-delay-2">
+          <div class="big-stat"><em>~45</em> <span class="unit">s recovery</span></div>
+          <p style="margin-top:1rem; font-size:.95rem; max-width:32ch">Pull the plug, wait, plug back in. Pi boots, advertises, phone reconnects. No keyboard, no app restart.</p>
+        </div>
+        <div class="reveal reveal-delay-3">
+          <div class="big-stat"><em>3</em> <span class="unit">checkpoints</span></div>
+          <p style="margin-top:1rem; font-size:.95rem; max-width:32ch">Plus the final. Paper schematic to closed-loop BLE control.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 05 · QUOTE ========== -->
+  <section class="section" id="course">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ 05 / Context</div>
+        <h2 class="section-title">Course &amp; <em>attribution.</em></h2>
+      </div>
+      <div class="body-grid reveal">
+        <div class="aside">Course</div>
+        <div class="body">
+          <p>Final project for <strong>ECSE 4235 — Embedded Systems</strong>, UGA, Spring 2026. The course is about microcontrollers, hardware interfaces, real-time constraints and low-level software; PARMCO is where we put all of it together.</p>
+          <p>Four checkpoints, from the schematic on paper to a motor spinning on a phone tap.</p>
+        </div>
+      </div>
+      <div class="body-grid reveal reveal-delay-1" style="margin-top:2rem">
+        <div class="aside">AI</div>
+        <div class="body">
+          <p>Code was drafted with <strong>Claude Opus 4.6</strong> and then debugged, rewritten, and extended by <strong>Jalen Edusei</strong> and <strong>Justin Moreno</strong>. Attribution is in the file headers, the commits, and on the <a href="team.html">Team page</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SECTION 06 · NAV OUT ========== -->
+  <section class="section" id="next">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <div class="section-num">§ 06 / Continue</div>
+        <h2 class="section-title">Where to <em>next.</em></h2>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-top:2rem;">
+        <a href="how-it-works.html" class="bare reveal" style="padding:2.2rem 1.8rem; background:var(--bg); color:var(--paper); display:block; text-decoration:none;">
+          <div style="font-family:var(--f-mono); font-size:.7rem; letter-spacing:.2em; color:var(--accent)">§ HOW IT WORKS →</div>
+          <div style="font-family:var(--f-display); font-size:1.8rem; margin-top:.8rem; line-height:1.05; letter-spacing:-.02em;">From tap to spin</div>
+        </a>
+        <a href="architecture.html" class="bare reveal reveal-delay-1" style="padding:2.2rem 1.8rem; background:var(--bg); color:var(--paper); display:block; text-decoration:none;">
+          <div style="font-family:var(--f-mono); font-size:.7rem; letter-spacing:.2em; color:var(--accent)">§ ARCHITECTURE →</div>
+          <div style="font-family:var(--f-display); font-size:1.8rem; margin-top:.8rem; line-height:1.05; letter-spacing:-.02em;">Schematics &amp; stacks</div>
+        </a>
+        <a href="checkpoints.html" class="bare reveal reveal-delay-2" style="padding:2.2rem 1.8rem; background:var(--bg); color:var(--paper); display:block; text-decoration:none;">
+          <div style="font-family:var(--f-mono); font-size:.7rem; letter-spacing:.2em; color:var(--accent)">§ CHECKPOINTS →</div>
+          <div style="font-family:var(--f-display); font-size:1.8rem; margin-top:.8rem; line-height:1.05; letter-spacing:-.02em;">The progression</div>
+        </a>
+        <a href="team.html" class="bare reveal reveal-delay-3" style="padding:2.2rem 1.8rem; background:var(--bg); color:var(--paper); display:block; text-decoration:none;">
+          <div style="font-family:var(--f-mono); font-size:.7rem; letter-spacing:.2em; color:var(--accent)">§ TEAM →</div>
+          <div style="font-family:var(--f-display); font-size:1.8rem; margin-top:.8rem; line-height:1.05; letter-spacing:-.02em;">Jalen &amp; Justin</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="footer-marquee" style="text-align: center">PARM<em>CO</em> · 2026</div>
+  <div class="footer-inner">
+    <div>PARMCO · ECSE 4235 · UGA</div>
+    <div>JALEN EDUSEI &amp; JUSTIN MORENO · GROUP 07</div>
+    <div>BUILT WITH CLAUDE · MMXXVI</div>
+  </div>
+</footer>
+
+<script src="tweaks.js"></script>
+<script src="bg-effects.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Hero — dot grid pulse
+  BgEffects.dotGrid(document.querySelector('.hero'));
+  // Three modes. One Loop — silk ribbons
+  BgEffects.silk(document.querySelector('#modes'));
+  // Where to next — dot grid pulse
+  BgEffects.dotGrid(document.querySelector('#next'));
+});
+</script>
+</body>
+</html>

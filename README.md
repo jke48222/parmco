@@ -1,12 +1,14 @@
 # PARMCO
 
+![Top language](https://img.shields.io/github/languages/top/jke48222/parmco) ![hardware](https://img.shields.io/badge/hardware-Raspberry%20Pi%204-red) ![link](https://img.shields.io/badge/link-BLE%20over%20BlueZ%20GATT-blue) [![site](https://img.shields.io/badge/site-jke48222.github.io%2Fparmco-brightgreen)](https://jke48222.github.io/parmco/)
+
 PARMCO is a phone app that spins a real motor. You tap a control on an iPhone and a 12 volt DC motor
 on the bench starts turning, reverses, ramps its speed, or holds a target speed on its own without
 anyone touching the machine it is wired to.
 
 **Live site: [jke48222.github.io/parmco](https://jke48222.github.io/parmco)**
 
-![The PARMCO iOS app](images/parmco-app.png)
+<img src="images/parmco-app.png" alt="The PARMCO iOS app" width="320">
 
 ## Where the code lives
 
